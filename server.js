@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 
@@ -9,7 +10,8 @@ const adminRouter = require("./router/adminRouter.js");
 const caregiverRouter = require("./router/caregiverRouter.js");
 const patientRouter = require("./router/patientRouter.js");
 
-const dbUrl = "mongodb://localhost:27017/Home_Care_Service_Management_System";
+// const dbUrl = "mongodb://localhost:27017/Home_Care_Service_Management_System";
+const dbUrl = process.env.MONGODB_URI;
 
 // Middleware
 app.use(cors());
