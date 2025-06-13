@@ -6,12 +6,14 @@ require("dotenv").config();
 const app = express();
 
 // Routes
-const adminRouter = require("./router/adminRouter.js");
-const caregiverRouter = require("./router/caregiverRouter.js");
-const patientRouter = require("./router/patientRouter.js");
 
-// const dbUrl = "mongodb://localhost:27017/Home_Care_Service_Management_System";
-const dbUrl = process.env.MONGODB_URI;
+const adminRoute = require("./router/admin_Route.js");
+const userRoute = require("./router/user_Route.js");
+const loanRoute = require("./router/loan_Route.js");
+const paymentRoute = require("./router/payment_Route.js");
+
+const dbUrl = "mongodb://localhost:27017/Pocket_loan_Management";
+// const dbUrl = process.env.MONGODB_URI;
 
 // Middleware
 app.use(cors());
@@ -27,9 +29,10 @@ mongoose
   .catch((err) => console.error("Error connecting to the database:", err));
 
 // Register routes
-app.use("/api/v1/admin", adminRouter);
-app.use("/api/v1/caregiver", caregiverRouter);
-app.use("/api/v1/patient", patientRouter);
+app.use("/api/v1/admin_route", adminRoute);
+app.use("/api/v1/user_route", userRoute);
+app.use("/api/v1/loan_route", loanRoute);
+app.use("/api/v1/payment_route", paymentRoute);
 
 const port = 5050;
 app.listen(port, () => {

@@ -1,0 +1,586 @@
+{
+	"info": {
+		"_postman_id": "1a64d465-c5c3-4f26-85a4-2a0c4c22f108",
+		"name": "pocket_backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40946566"
+	},
+	"item": [
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"John\",\r\n  \"lastName\": \"Doe\",\r\n  \"profilePicture\": \"https://example.com/images/johndoe.jpg\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"contactNumber\": \"+1234567890\",\r\n  \"password\": \"SecurePass123!\",\r\n  \"role\": \"admin\",\r\n  \"permissions\": [\"create_user\", \"manage_loans\", \"view_reports\"],\r\n  \"notifications\": [\r\n    {\r\n      \"message\": \"Loan request received\",\r\n      \"type\": \"loan\",\r\n      \"read\": false\r\n    },\r\n    {\r\n      \"message\": \"System maintenance scheduled\",\r\n      \"type\": \"system\",\r\n      \"read\": false\r\n    }\r\n  ],\r\n  \"settings\": {\r\n    \"interestRate\": 0.05,\r\n    \"loanTerms\": [\"6 months\", \"12 months\"],\r\n    \"workflows\": {\r\n      \"approvalStep1\": \"manager\",\r\n      \"approvalStep2\": \"admin\"\r\n    }\r\n  },\r\n  \"auditTrail\": [\r\n    {\r\n      \"action\": \"created_user\",\r\n      \"entity\": \"User\",\r\n      \"entityId\": \"60b8c0c7d5f6b54134e8d183\",\r\n      \"performedBy\": \"60b8c0c7d5f6b54134e8d182\"\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/admin_route/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"admin_route",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"john.doe@example.com\",\r\n    \"password\":\"SecurePass123!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/admin_route/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"admin_route",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getall",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFiZDUxNTI1OWE5ZDcwMzcwMDg0ZSIsImVtYWlsIjoiam9obi5kb2VAZXhhbXBsZS5jb20iLCJpYXQiOjE3NDk3Mjg4NjAsImV4cCI6MTc0OTc1NzY2MH0.s5nwLlGDRRLa3750GambWynInTo2J1I8PdZU0swWUJY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5050/api/v1/admin_route/getall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"admin_route",
+								"getall"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"Blessing\",\r\n  \"lastName\": \"bee\",\r\n  \"email\": \"bee@gmail.com\",\r\n  \"phoneNumber\": \"+263 77777789\",\r\n  \"password\": \"bee123\",\r\n  \"address\": \"Tokyo\",\r\n  \"profilePicture\": \"https://example.com/images/jane.jpg\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/user_route/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"user_route",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"bee@gmail.com\",\r\n    \"password\":\"bee123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/user_route/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"user_route",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getall",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFmMjMxMDk1ZmE1MWQ1ODY4Mzc0ZiIsImVtYWlsIjoiYmVlQGdtYWlsLmNvbSIsImlhdCI6MTc0OTgxMjMyMiwiZXhwIjoxNzQ5ODQxMTIyfQ.oAgp5BqZ9xfqw28XaxvBnfBdyke8MCK3xAzVk5KQDDQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/user_route/all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"user_route",
+								"all"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "loan",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFmMjMxMDk1ZmE1MWQ1ODY4Mzc0ZiIsImVtYWlsIjoiYmVlQGdtYWlsLmNvbSIsImlhdCI6MTc0OTgxMjMyMiwiZXhwIjoxNzQ5ODQxMTIyfQ.oAgp5BqZ9xfqw28XaxvBnfBdyke8MCK3xAzVk5KQDDQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user\": \"684af231095fa51d5868374f\", \r\n  \"productType\": \"Vehicle Loan (Long Term)\",\r\n\r\n  \"borrowerInfo\": {\r\n    \"firstName\": \"John\",\r\n    \"middleNames\": \"Alexander\",\r\n    \"surname\": \"Doe\",\r\n    \"alias\": \"JD\",\r\n    \"idNumber\": \"ID123456\",\r\n    \"passport\": \"P123456\",\r\n    \"email\": \"john.doe@example.com\",\r\n    \"phone\": \"+1234567890\",\r\n    \"mobile\": \"+1234567890\",\r\n    \"ecocash\": true,\r\n    \"oneMoney\": false,\r\n    \"innsBucks\": false,\r\n    \"maritalStatus\": \"Married\",\r\n    \"children\": 2,\r\n    \"childrenUnder18\": 1,\r\n    \"dependents\": 3\r\n  },\r\n\r\n  \"spouseInfo\": {\r\n    \"employed\": true,\r\n    \"firstName\": \"Jane\",\r\n    \"middleNames\": \"Marie\",\r\n    \"surname\": \"Doe\",\r\n    \"alias\": \"JD\",\r\n    \"idNumber\": \"ID654321\",\r\n    \"passport\": \"P654321\",\r\n    \"phone\": \"+0987654321\",\r\n    \"mobile\": \"+0987654321\",\r\n    \"email\": \"jane.doe@example.com\",\r\n    \"ecocash\": true,\r\n    \"oneMoney\": false,\r\n    \"innsBucks\": false\r\n  },\r\n\r\n  \"residentialHistory\": {\r\n    \"currentAddress\": {\r\n      \"street\": \"123 Main St\",\r\n      \"city\": \"Harare\",\r\n      \"province\": \"Harare\",\r\n      \"phone\": \"0123456789\",\r\n      \"mobile\": \"0987654321\",\r\n      \"work\": \"0456123789\",\r\n      \"owned\": true,\r\n      \"rentAmount\": 0,\r\n      \"historyYears\": 5\r\n    },\r\n    \"previousAddress\": {\r\n      \"street\": \"456 Oak Ave\",\r\n      \"city\": \"Bulawayo\",\r\n      \"province\": \"Bulawayo\",\r\n      \"phone\": \"0789456123\",\r\n      \"mobile\": \"0678945612\",\r\n      \"work\": \"0456789123\",\r\n      \"owned\": false,\r\n      \"rentAmount\": 300,\r\n      \"historyYears\": 2\r\n    },\r\n    \"landlordName\": \"Mr. Smith\",\r\n    \"rentalCompany\": \"City Rentals\"\r\n  },\r\n\r\n  \"borrowerEmploymentHistory\": [\r\n    {\r\n      \"company\": \"Tech Corp\",\r\n      \"jobTitle\": \"Engineer\",\r\n      \"address\": \"789 Tech Park\",\r\n      \"suburb\": \"Eastlea\",\r\n      \"city\": \"Harare\",\r\n      \"province\": \"Harare\",\r\n      \"contactEmail\": \"hr@techcorp.com\",\r\n      \"contactPhone\": \"0712345678\",\r\n      \"salary\": 1200,\r\n      \"from\": \"2020-01-01\",\r\n      \"to\": \"2023-12-31\"\r\n    }\r\n  ],\r\n\r\n  \"borrowerBusinessHistory\": [],\r\n  \"spouseEmploymentHistory\": [],\r\n  \"spouseBusinessHistory\": [],\r\n\r\n  \"financialSummary\": {\r\n    \"salary\": 1200,\r\n    \"hustleProfit\": 200,\r\n    \"businessExpenses\": 50,\r\n    \"bonuses\": 100,\r\n    \"rent\": 0,\r\n    \"rentalIncome\": 0,\r\n    \"schoolFees\": 100,\r\n    \"investmentIncome\": 50,\r\n    \"ratesAndBills\": 70,\r\n    \"otherIncome\": 20,\r\n    \"loanRepayments\": 200,\r\n    \"otherDebts\": 150,\r\n    \"totalIncome\": 1570,\r\n    \"totalExpenses\": 570,\r\n    \"netIncome\": 1000\r\n  },\r\n\r\n  \"borrowerAssetsLiabilities\": {\r\n    \"assets\": {\r\n      \"property\": [\"House in Harare\"],\r\n      \"vehicles\": [\"Toyota Corolla\"],\r\n      \"furniture\": 2000,\r\n      \"machinery\": 1000,\r\n      \"artwork\": 500,\r\n      \"shares\": [\"ZSE Holdings\"],\r\n      \"pension\": 3000,\r\n      \"mutualFunds\": 1500,\r\n      \"total\": 10000\r\n    },\r\n    \"liabilities\": {\r\n      \"mortgages\": [1000],\r\n      \"bankLoans\": [500],\r\n      \"retailLoans\": [\"Retail Credit A\"],\r\n      \"otherDebts\": [\"Loan from friend\"],\r\n      \"total\": 2000\r\n    },\r\n    \"net\": 8000\r\n  },\r\n\r\n  \"spouseAssetsLiabilities\": {\r\n    \"assets\": {\r\n      \"property\": [],\r\n      \"vehicles\": [],\r\n      \"furniture\": 0,\r\n      \"machinery\": 0,\r\n      \"artwork\": 0,\r\n      \"shares\": [],\r\n      \"pension\": 0,\r\n      \"mutualFunds\": 0,\r\n      \"total\": 0\r\n    },\r\n    \"liabilities\": {\r\n      \"mortgages\": [],\r\n      \"bankLoans\": [],\r\n      \"retailLoans\": [],\r\n      \"otherDebts\": [],\r\n      \"total\": 0\r\n    },\r\n    \"net\": 0\r\n  },\r\n\r\n  \"bankReferences\": [\r\n    {\r\n      \"institution\": \"ABC Bank\",\r\n      \"currentAccount\": \"123456789\",\r\n      \"savingsAccount\": \"987654321\",\r\n      \"loanNumber\": \"LN12345\",\r\n      \"loanBalance\": 5000,\r\n      \"branch\": \"Central Branch\"\r\n    }\r\n  ],\r\n\r\n  \"bankruptcy\": {\r\n    \"hasDeclared\": false,\r\n    \"declaredDate\": null\r\n  },\r\n\r\n  \"status\": \"pending\",\r\n  \"applicationDate\": \"2025-06-12\",\r\n  \"approvalDate\": null,\r\n  \"startDate\": null,\r\n  \"endDate\": null,\r\n  \"amount\": 10000,\r\n  \"interestRate\": 0.05,\r\n  \"term\": 12,\r\n  \"balance\": 10000,\r\n  \"paymentSchedule\": [\r\n    {\r\n      \"dueDate\": \"2025-07-12\",\r\n      \"amountDue\": 850,\r\n      \"amountPaid\": 0,\r\n      \"paidOn\": null,\r\n      \"status\": \"pending\"\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/loan_route/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"loan_route",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getall",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFmMjMxMDk1ZmE1MWQ1ODY4Mzc0ZiIsImVtYWlsIjoiYmVlQGdtYWlsLmNvbSIsImlhdCI6MTc0OTgxMjMyMiwiZXhwIjoxNzQ5ODQxMTIyfQ.oAgp5BqZ9xfqw28XaxvBnfBdyke8MCK3xAzVk5KQDDQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/loan_route/getall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"loan_route",
+								"getall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_byID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFjMjA5ZWU4Njg1M2ExMWJhZDBjZCIsImVtYWlsIjoiamFuZS5zbWl0aEBleGFtcGxlLmNvbSIsImlhdCI6MTc0OTcyOTg3NywiZXhwIjoxNzQ5NzU4Njc3fQ.hMNYW8BQJMRqpvzqNxKEbyi9xFouVoa9WkmROR-v_lI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5050/api/v1/loan_route/get/684ac483bb36965b099fe445",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"loan_route",
+								"get",
+								"684ac483bb36965b099fe445"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFjMjA5ZWU4Njg1M2ExMWJhZDBjZCIsImVtYWlsIjoiamFuZS5zbWl0aEBleGFtcGxlLmNvbSIsImlhdCI6MTc0OTcyOTg3NywiZXhwIjoxNzQ5NzU4Njc3fQ.hMNYW8BQJMRqpvzqNxKEbyi9xFouVoa9WkmROR-v_lI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user\": \"60b8c0c7d5f6b54134e8d182\", \r\n  \"productType\": \"vehicle\",\r\n\r\n  \"borrowerInfo\": {\r\n    \"firstName\": \"Blessing\",\r\n    \"middleNames\": \"Alexander\",\r\n    \"surname\": \"Doe\",\r\n    \"alias\": \"JD\",\r\n    \"idNumber\": \"ID123456\",\r\n    \"passport\": \"P123456\",\r\n    \"email\": \"john.doe@example.com\",\r\n    \"phone\": \"+1234567890\",\r\n    \"mobile\": \"+1234567890\",\r\n    \"ecocash\": true,\r\n    \"oneMoney\": false,\r\n    \"innsBucks\": false,\r\n    \"maritalStatus\": \"Married\",\r\n    \"children\": 2,\r\n    \"childrenUnder18\": 1,\r\n    \"dependents\": 3\r\n  },\r\n\r\n  \"spouseInfo\": {\r\n    \"employed\": true,\r\n    \"firstName\": \"Jane\",\r\n    \"middleNames\": \"Marie\",\r\n    \"surname\": \"Doe\",\r\n    \"alias\": \"JD\",\r\n    \"idNumber\": \"ID654321\",\r\n    \"passport\": \"P654321\",\r\n    \"phone\": \"+0987654321\",\r\n    \"mobile\": \"+0987654321\",\r\n    \"email\": \"jane.doe@example.com\",\r\n    \"ecocash\": true,\r\n    \"oneMoney\": false,\r\n    \"innsBucks\": false\r\n  },\r\n\r\n  \"residentialHistory\": {\r\n    \"currentAddress\": {\r\n      \"street\": \"123 Main St\",\r\n      \"city\": \"Harare\",\r\n      \"province\": \"Harare\",\r\n      \"phone\": \"0123456789\",\r\n      \"mobile\": \"0987654321\",\r\n      \"work\": \"0456123789\",\r\n      \"owned\": true,\r\n      \"rentAmount\": 0,\r\n      \"historyYears\": 5\r\n    },\r\n    \"previousAddress\": {\r\n      \"street\": \"456 Oak Ave\",\r\n      \"city\": \"Bulawayo\",\r\n      \"province\": \"Bulawayo\",\r\n      \"phone\": \"0789456123\",\r\n      \"mobile\": \"0678945612\",\r\n      \"work\": \"0456789123\",\r\n      \"owned\": false,\r\n      \"rentAmount\": 300,\r\n      \"historyYears\": 2\r\n    },\r\n    \"landlordName\": \"Mr. Smith\",\r\n    \"rentalCompany\": \"City Rentals\"\r\n  },\r\n\r\n  \"borrowerEmploymentHistory\": [\r\n    {\r\n      \"company\": \"Tech Corp\",\r\n      \"jobTitle\": \"Engineer\",\r\n      \"address\": \"789 Tech Park\",\r\n      \"suburb\": \"Eastlea\",\r\n      \"city\": \"Harare\",\r\n      \"province\": \"Harare\",\r\n      \"contactEmail\": \"hr@techcorp.com\",\r\n      \"contactPhone\": \"0712345678\",\r\n      \"salary\": 1200,\r\n      \"from\": \"2020-01-01\",\r\n      \"to\": \"2023-12-31\"\r\n    }\r\n  ],\r\n\r\n  \"borrowerBusinessHistory\": [],\r\n  \"spouseEmploymentHistory\": [],\r\n  \"spouseBusinessHistory\": [],\r\n\r\n  \"financialSummary\": {\r\n    \"salary\": 1200,\r\n    \"hustleProfit\": 200,\r\n    \"businessExpenses\": 50,\r\n    \"bonuses\": 100,\r\n    \"rent\": 0,\r\n    \"rentalIncome\": 0,\r\n    \"schoolFees\": 100,\r\n    \"investmentIncome\": 50,\r\n    \"ratesAndBills\": 70,\r\n    \"otherIncome\": 20,\r\n    \"loanRepayments\": 200,\r\n    \"otherDebts\": 150,\r\n    \"totalIncome\": 1570,\r\n    \"totalExpenses\": 570,\r\n    \"netIncome\": 1000\r\n  },\r\n\r\n  \"borrowerAssetsLiabilities\": {\r\n    \"assets\": {\r\n      \"property\": [\"House in Harare\"],\r\n      \"vehicles\": [\"Toyota Corolla\"],\r\n      \"furniture\": 2000,\r\n      \"machinery\": 1000,\r\n      \"artwork\": 500,\r\n      \"shares\": [\"ZSE Holdings\"],\r\n      \"pension\": 3000,\r\n      \"mutualFunds\": 1500,\r\n      \"total\": 10000\r\n    },\r\n    \"liabilities\": {\r\n      \"mortgages\": [1000],\r\n      \"bankLoans\": [500],\r\n      \"retailLoans\": [\"Retail Credit A\"],\r\n      \"otherDebts\": [\"Loan from friend\"],\r\n      \"total\": 2000\r\n    },\r\n    \"net\": 8000\r\n  },\r\n\r\n  \"spouseAssetsLiabilities\": {\r\n    \"assets\": {\r\n      \"property\": [],\r\n      \"vehicles\": [],\r\n      \"furniture\": 0,\r\n      \"machinery\": 0,\r\n      \"artwork\": 0,\r\n      \"shares\": [],\r\n      \"pension\": 0,\r\n      \"mutualFunds\": 0,\r\n      \"total\": 0\r\n    },\r\n    \"liabilities\": {\r\n      \"mortgages\": [],\r\n      \"bankLoans\": [],\r\n      \"retailLoans\": [],\r\n      \"otherDebts\": [],\r\n      \"total\": 0\r\n    },\r\n    \"net\": 0\r\n  },\r\n\r\n  \"bankReferences\": [\r\n    {\r\n      \"institution\": \"ABC Bank\",\r\n      \"currentAccount\": \"123456789\",\r\n      \"savingsAccount\": \"987654321\",\r\n      \"loanNumber\": \"LN12345\",\r\n      \"loanBalance\": 5000,\r\n      \"branch\": \"Central Branch\"\r\n    }\r\n  ],\r\n\r\n  \"bankruptcy\": {\r\n    \"hasDeclared\": false,\r\n    \"declaredDate\": null\r\n  },\r\n\r\n  \"status\": \"pending\",\r\n  \"applicationDate\": \"2025-06-12\",\r\n  \"approvalDate\": null,\r\n  \"startDate\": null,\r\n  \"endDate\": null,\r\n  \"amount\": 10000,\r\n  \"interestRate\": 0.05,\r\n  \"term\": 12,\r\n  \"balance\": 10000,\r\n  \"paymentSchedule\": [\r\n    {\r\n      \"dueDate\": \"2025-07-12\",\r\n      \"amountDue\": 850,\r\n      \"amountPaid\": 0,\r\n      \"paidOn\": null,\r\n      \"status\": \"pending\"\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/loan_route/update/684ac483bb36965b099fe445",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"loan_route",
+								"update",
+								"684ac483bb36965b099fe445"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFmMjMxMDk1ZmE1MWQ1ODY4Mzc0ZiIsImVtYWlsIjoiYmVlQGdtYWlsLmNvbSIsImlhdCI6MTc0OTgxMjMyMiwiZXhwIjoxNzQ5ODQxMTIyfQ.oAgp5BqZ9xfqw28XaxvBnfBdyke8MCK3xAzVk5KQDDQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/loan_route/delete/684bf4fdf7f68eaa3b85ed48",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"loan_route",
+								"delete",
+								"684bf4fdf7f68eaa3b85ed48"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "payment",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFjMjA5ZWU4Njg1M2ExMWJhZDBjZCIsImVtYWlsIjoiamFuZS5zbWl0aEBleGFtcGxlLmNvbSIsImlhdCI6MTc0OTcyOTg3NywiZXhwIjoxNzQ5NzU4Njc3fQ.hMNYW8BQJMRqpvzqNxKEbyi9xFouVoa9WkmROR-v_lI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n  \"loan\": \"684ac483bb36965b099fe445\",   \r\n  \"user\": \"684ac209ee86853a11bad0cd\",   \r\n  \"amountPaid\": 1200.00,\r\n  \"paymentDate\": \"2025-06-10T15:30:00.000Z\",\r\n  \"paymentMethod\": \"BankTransfer\",\r\n  \"paymentReference\": \"BANKTXN87654321\",\r\n  \"forInstallmentDate\": \"2025-08-01T00:00:00.000Z\",\r\n  \"status\": \"pending\",\r\n  \"notes\": \"Payment processed through online banking platform. Awaiting confirmation.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/payment_route/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"payment_route",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getall",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFjMjA5ZWU4Njg1M2ExMWJhZDBjZCIsImVtYWlsIjoiamFuZS5zbWl0aEBleGFtcGxlLmNvbSIsImlhdCI6MTc0OTcyOTg3NywiZXhwIjoxNzQ5NzU4Njc3fQ.hMNYW8BQJMRqpvzqNxKEbyi9xFouVoa9WkmROR-v_lI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5050/api/v1/payment_route/getall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"payment_route",
+								"getall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFjMjA5ZWU4Njg1M2ExMWJhZDBjZCIsImVtYWlsIjoiamFuZS5zbWl0aEBleGFtcGxlLmNvbSIsImlhdCI6MTc0OTcyOTg3NywiZXhwIjoxNzQ5NzU4Njc3fQ.hMNYW8BQJMRqpvzqNxKEbyi9xFouVoa9WkmROR-v_lI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5050/api/v1/payment_route/delete/684acb1cf52996e4b1b9161b",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"payment_route",
+								"delete",
+								"684acb1cf52996e4b1b9161b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_byID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NGFjMjA5ZWU4Njg1M2ExMWJhZDBjZCIsImVtYWlsIjoiamFuZS5zbWl0aEBleGFtcGxlLmNvbSIsImlhdCI6MTc0OTcyOTg3NywiZXhwIjoxNzQ5NzU4Njc3fQ.hMNYW8BQJMRqpvzqNxKEbyi9xFouVoa9WkmROR-v_lI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5050/api/v1/payment_route/get/684acbb2f52996e4b1b9161f",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"v1",
+								"payment_route",
+								"get",
+								"684acbb2f52996e4b1b9161f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

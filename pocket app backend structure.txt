@@ -1,0 +1,42 @@
+loan-dashboard-backend/
+├── config/
+│   └── db.js
+├── controllers/
+│   ├── authController.js
+│   ├── userController.js        # User-side logic
+│   ├── adminUserController.js   # Admin-side logic
+│   ├── loanController.js        # Shared for user/admin
+│   ├── paymentController.js
+│   ├── notificationController.js
+│   ├── settingsController.js
+│   └── supportController.js
+├── middleware/
+│   ├── auth.js                  # JWT-based auth
+│   └── role.js                  # Role-based access
+├── models/
+│   ├── User.js
+│   ├── Loan.js
+│   ├── Payment.js
+│   ├── Notification.js
+│   ├── Document.js
+│   ├── AuditLog.js
+│   └── SupportTicket.js
+├── routes/
+│   ├── authRoutes.js
+│   ├── userRoutes.js
+│   ├── adminRoutes.js
+│   ├── loanRoutes.js
+│   ├── paymentRoutes.js
+│   ├── notificationRoutes.js
+│   ├── supportRoutes.js
+│   └── settingsRoutes.js
+├── utils/
+│   ├── email.js
+│   └── loanCalculator.js
+├── .env
+├── server.js
+└── package.json
+
+
+creaet the controllers for me
+
