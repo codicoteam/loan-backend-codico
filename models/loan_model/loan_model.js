@@ -115,10 +115,10 @@ const loanSchema = new mongoose.Schema(
     productType: {
       type: String,
       enum: [
-        " Education Loan (Short Term)",
+        "Education Loan (Short Term)", // Removed leading space
         "Vehicle Loan (Long Term)",
         "Solar Loan (LT)",
-        " Building Finisher Loan (LT)",
+        "Building Finisher Loan (LT)", // Removed leading space, kept space before (LT)
       ],
       required: true,
     },

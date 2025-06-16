@@ -31,6 +31,16 @@ const getLoanById = async (id) => {
   }
 };
 
+// Get loans by user ID
+const getLoansByUserId = async (userId) => {
+  try {
+    const loans = await Loan.find({ user: userId }).populate("user");
+    return loans;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 // Update a loan by ID
 const updateLoan = async (id, updateData) => {
   try {
@@ -59,6 +69,7 @@ module.exports = {
   createLoan,
   getAllLoans,
   getLoanById,
+  getLoansByUserId,
   updateLoan,
   deleteLoan,
 };

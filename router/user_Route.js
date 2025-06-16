@@ -69,7 +69,7 @@ router.get("/all", authenticateToken, async (req, res) => {
 });
 
 // Get user by ID
-router.get("/:id", authenticateToken, async (req, res) => {
+router.get("/get/:id", authenticateToken, async (req, res) => {
   try {
     const user = await userService.getUserById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });

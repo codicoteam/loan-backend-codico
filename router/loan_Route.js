@@ -29,7 +29,23 @@ router.get("/getall", authenticateToken, async (req, res) => {
   }
 });
 
-// Get loan by ID
+// Get loans by user ID
+router.get("/user/:userId", authenticateToken, async (req, res) => {
+  try {
+    const loans = await loanService.getLoansByUserId(req.params.userId);
+    res.status(200).json({
+      message: "User loans fetched successfully",
+      data: loans,
+      count: loans.length,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to fetch user loans",
+      error: error.message,
+    });
+  }
+});
+// Get loan by User ID
 router.get("/get/:id", authenticateToken, async (req, res) => {
   try {
     const loan = await loanService.getLoanById(req.params.id);
