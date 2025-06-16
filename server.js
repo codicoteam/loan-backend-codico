@@ -13,7 +13,8 @@ const loanRoute = require("./router/loan_Route.js");
 const paymentRoute = require("./router/payment_Route.js");
 
 const dbUrl =
-  "mongodb+srv://toto_academy:toto_academy@totoacademy.sprvhvq.mongodb.net/?retryWrites=true&w=majority&appName=totoAcademy/Pocket_loan_Management";
+  "mongodb+srv://pockettloan:pockettloan12345@pocket.sbssyen.mongodb.net/";
+
 // const dbUrl = process.env.MONGODB_URI;
 //"mongodb://localhost:27017/Pocket_loan_Management"
 // "mongodb+srv://toto_academy:toto_academy@totoacademy.sprvhvq.mongodb.net/?retryWrites=true&w=majority&appName=totoAcademy/Pocket_loan_Management";
