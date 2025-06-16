@@ -13,7 +13,7 @@ const loanRoute = require("./router/loan_Route.js");
 const paymentRoute = require("./router/payment_Route.js");
 
 const dbUrl =
-  "mongodb+srv://pockettloan:<db_password>@pocket.sbssyen.mongodb.net/?retryWrites=true&w=majority&appName=pocket";
+  "mongodb+srv://pockettloan:pockettloan12345@pocket.sbssyen.mongodb.net/?retryWrites=true&w=majority&appName=pocket";
 
 // const dbUrl = process.env.MONGODB_URI;
 //"mongodb://localhost:27017/Pocket_loan_Management"
