@@ -30,7 +30,7 @@ router.post("/signup", async (req, res) => {
       .json({ message: "Registration failed", error: error.message });
   }
 });
-
+// User Login
 // User Login
 router.post("/login", async (req, res) => {
   try {
@@ -50,7 +50,20 @@ router.post("/login", async (req, res) => {
       expiresIn: "8h",
     });
 
-    res.status(200).json({ message: "Login successful", token });
+    // Create user object without password for security
+    const userResponse = {
+      _id: user._id,
+      email: user.email,
+      name: user.firstName,
+      // createdAt: user.createdAt,
+      // etc.
+    };
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: userResponse,
+    });
   } catch (error) {
     res.status(500).json({ message: "Login failed", error: error.message });
   }
