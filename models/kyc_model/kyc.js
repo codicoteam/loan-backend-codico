@@ -31,10 +31,6 @@ const kycSchema = new mongoose.Schema(
     reviewedAt: {
       type: Date,
     },
-    reviewedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin", // Reviewer admin reference
-    },
   },
   {
     timestamps: true,

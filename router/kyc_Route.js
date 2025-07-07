@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const kycService = require("../services/kycService");
+const kycService = require("../services/kyc_Service");
 
 // Create a new KYC document
 router.post("/create", async (req, res) => {
