@@ -38,7 +38,7 @@ app.use("/api/v1/admin_route", adminRoute);
 app.use("/api/v1/user_route", userRoute);
 app.use("/api/v1/loan_route", loanRoute);
 app.use("/api/v1/payment_route", paymentRoute);
-app.use("/api/v1/jyc_route", kycRoute);
+app.use("/api/v1/kyc_route", kycRoute);
 
 const port = 5050;
 app.listen(port, () => {
