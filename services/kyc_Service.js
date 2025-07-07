@@ -1,4 +1,4 @@
-const KycDocument = require("../models/kyc_model");
+const KycDocument = require("../models/kyc_model/kyc");
 
 // Create a new KYC document
 const createKycDocument = async (data) => {
