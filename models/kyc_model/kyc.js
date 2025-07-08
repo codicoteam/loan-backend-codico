@@ -5,32 +5,32 @@ const kycSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // Make sure you have a User model
-      required: true,
+      required: false,
     },
     nationalId: {
       type: String,
-      required: true,
+      required: false,
     },
     passportPhoto: {
       type: String,
-      required: true,
+      required: false,
     },
     proofOfResident: {
       type: String,
-      required: true,
+      required: false,
     },
     paySlip: {
       type: String,
-      required: true,
+      required: false,
     },
     proofOfEmployment: {
       type: String,
-      required: true,
+      required: false,
     },
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
-      required: true,
+      required: false,
     },
 
     reviewedAt: {
