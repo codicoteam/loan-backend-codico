@@ -34,7 +34,7 @@ router.get("/get/:userId", async (req, res) => {
 });
 
 // Get KYC by KYC document ID
-router.get("/get/:id", async (req, res) => {
+router.get("/getby/:id", async (req, res) => {
   try {
     const kyc = await kycService.getKycById(req.params.id);
     if (!kyc) return res.status(404).json({ error: "KYC not found" });

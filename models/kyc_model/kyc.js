@@ -27,6 +27,11 @@ const kycSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      required: true,
+    },
 
     reviewedAt: {
       type: Date,
