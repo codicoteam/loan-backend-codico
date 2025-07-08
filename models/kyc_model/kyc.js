@@ -32,7 +32,12 @@ const kycSchema = new mongoose.Schema(
       ref: "Admin",
       required: false,
     },
-
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+      required: false,
+    },
     reviewedAt: {
       type: Date,
     },
