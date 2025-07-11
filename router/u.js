@@ -11,29 +11,14 @@ router.post("/signup", async (req, res) => {
     const newUser = await userService.createUser(req.body);
 
     const token = jwt.sign(
-      { id: newUser._id, email: newUser.email, role: newUser.role },
+      { id: newUser._id, email: newUser.email },
       "Pocket_2025",
       { expiresIn: "8h" }
     );
 
-    // Create user object without password for security
-    const userResponse = {
-      _id: newUser._id,
-      email: newUser.email,
-      firstName: newUser.firstName,
-      lastName: newUser.lastName,
-      phoneNumber: newUser.phoneNumber,
-      address: newUser.address,
-      profilePicture: newUser.profilePicture,
-      role: newUser.role,
-      createdByAgent: newUser.createdByAgent,
-      createdAt: newUser.createdAt,
-      updatedAt: newUser.updatedAt,
-    };
-
     res.status(201).json({
       message: "User registered successfully",
-      data: userResponse,
+      data: newUser,
       token,
     });
   } catch (error) {
@@ -45,7 +30,7 @@ router.post("/signup", async (req, res) => {
       .json({ message: "Registration failed", error: error.message });
   }
 });
-
+// User Login
 // User Login
 router.post("/login", async (req, res) => {
   try {
@@ -61,27 +46,17 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
-      "Pocket_2025",
-      {
-        expiresIn: "8h",
-      }
-    );
+    const token = jwt.sign({ id: user._id, email: user.email }, "Pocket_2025", {
+      expiresIn: "8h",
+    });
 
     // Create user object without password for security
     const userResponse = {
       _id: user._id,
       email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phoneNumber: user.phoneNumber,
-      address: user.address,
-      profilePicture: user.profilePicture,
-      role: user.role,
-      createdByAgent: user.createdByAgent,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      name: user.firstName,
+      // createdAt: user.createdAt,
+      // etc.
     };
 
     res.status(200).json({
@@ -116,22 +91,6 @@ router.get("/get/:id", authenticateToken, async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching user", error: error.message });
-  }
-});
-
-// Get users by agent ID
-router.get("/get/agent/:agentId", authenticateToken, async (req, res) => {
-  try {
-    const users = await userService.getUsersByAgentId(req.params.agentId);
-    res.status(200).json({
-      message: "Users retrieved successfully",
-      data: users,
-      count: users.length,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching users by agent", error: error.message });
   }
 });
 

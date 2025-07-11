@@ -32,17 +32,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    role: {
-      type: String,
-      enum: ["customer", "agent"],
-      default: "customer",
-      required: true,
-    },
-    createdByAgent: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Self-reference
-      default: null,
-    },
   },
   {
     timestamps: true,

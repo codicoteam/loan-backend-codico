@@ -42,6 +42,18 @@ const getUserById = async (id) => {
   }
 };
 
+// Get users by agent ID
+const getUsersByAgentId = async (agentId) => {
+  try {
+    const users = await User.find({ createdByAgent: agentId })
+      .select("-password") // Exclude password from results
+      .populate("createdByAgent", "firstName lastName email role"); // Populate agent details
+    return users;
+  } catch (error) {
+    throw new Error(`Error fetching users by agent: ${error.message}`);
+  }
+};
+
 // Update user
 const updateUser = async (id, updateData) => {
   try {
@@ -71,6 +83,7 @@ module.exports = {
   getAllUsers,
   getUserByEmail,
   getUserById,
+  getUsersByAgentId,
   updateUser,
   deleteUser,
 };
