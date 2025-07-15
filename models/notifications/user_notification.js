@@ -1,22 +1,12 @@
 const mongoose = require("mongoose");
 
-const notificationSchema = new mongoose.Schema(
+const usernotificationSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    type: {
-      type: String,
-      enum: [
-        "loan_update",
-        "payment_due",
-        "payment_received",
-        "system_alert",
-        "custom",
-      ],
-      default: "custom",
-    },
+
     message: {
       type: String,
       required: true,
@@ -35,4 +25,4 @@ const notificationSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Notification", notificationSchema);
+module.exports = mongoose.model("UserNotification", usernotificationSchema);

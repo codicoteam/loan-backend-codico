@@ -12,6 +12,8 @@ const userRoute = require("./router/user_Route.js");
 const loanRoute = require("./router/loan_Route.js");
 const paymentRoute = require("./router/payment_Route.js");
 const kycRoute = require("./router/kyc_Route.js");
+const user_notificationRoute = require("./router/user_notification_Route.js");
+const admin_notificationRoute = require("./router/admin_notification_Route.js");
 
 const dbUrl =
   "mongodb+srv://pockettloan:pockettloan12345@pocket.sbssyen.mongodb.net/?retryWrites=true&w=majority&appName=pocket";
@@ -39,6 +41,8 @@ app.use("/api/v1/user_route", userRoute);
 app.use("/api/v1/loan_route", loanRoute);
 app.use("/api/v1/payment_route", paymentRoute);
 app.use("/api/v1/kyc_route", kycRoute);
+app.use("/api/v1/usernotification_route", user_notificationRoute);
+app.use("/api/v1/adminnotification_route", admin_notificationRoute);
 
 const port = 5050;
 app.listen(port, () => {
