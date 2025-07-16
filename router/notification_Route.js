@@ -1,14 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const adminNotificationService = require("../services/admin_notification_Service");
+const notificationService = require("../services/notifications_Service");
 const { authenticateToken } = require("../middlewares/auth");
 
-// Create a new admin notification
+// Create a new notification
 router.post("/create", authenticateToken, async (req, res) => {
   try {
-    const notification = await adminNotificationService.createAdminNotification(
-      req.body
-    );
+    const notification = await notificationService.createNotification(req.body);
     res
       .status(201)
       .json({ message: "Notification created", data: notification });
@@ -17,11 +15,10 @@ router.post("/create", authenticateToken, async (req, res) => {
   }
 });
 
-// Get all admin notifications
+// Get all notifications
 router.get("/getall", authenticateToken, async (req, res) => {
   try {
-    const notifications =
-      await adminNotificationService.getAllAdminNotifications();
+    const notifications = await notificationService.getAllNotifications();
     res
       .status(200)
       .json({ message: "Notifications fetched", data: notifications });
@@ -32,15 +29,14 @@ router.get("/getall", authenticateToken, async (req, res) => {
   }
 });
 
-// Get notifications by admin ID
-router.get("/get/:adminId", authenticateToken, async (req, res) => {
+// Get notifications by receiver ID
+router.get("/get/:receiverId", authenticateToken, async (req, res) => {
   try {
+    const { receiverId } = req.params;
     const notifications =
-      await adminNotificationService.getAdminNotificationsByUserId(
-        req.params.adminId
-      );
+      await notificationService.getNotificationsByReceiverId(receiverId);
     res.status(200).json({
-      message: "Admin notifications fetched",
+      message: "Notifications fetched",
       data: notifications,
       count: notifications.length,
     });
@@ -54,7 +50,7 @@ router.get("/get/:adminId", authenticateToken, async (req, res) => {
 // Mark a specific notification as read
 router.put("/read/:id", authenticateToken, async (req, res) => {
   try {
-    const updated = await adminNotificationService.markAdminNotificationAsRead(
+    const updated = await notificationService.markNotificationAsRead(
       req.params.id
     );
     res
@@ -65,11 +61,11 @@ router.put("/read/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Mark all notifications as read for an admin
-router.put("/read-all/:adminId", authenticateToken, async (req, res) => {
+// Mark all notifications as read for a receiver
+router.put("/read-all/:receiverId", authenticateToken, async (req, res) => {
   try {
-    const result = await adminNotificationService.markAllAdminAsReadForUser(
-      req.params.adminId
+    const result = await notificationService.markAllAsReadForReceiver(
+      req.params.receiverId
     );
     res.status(200).json({
       message: "All notifications marked as read",
@@ -82,10 +78,10 @@ router.put("/read-all/:adminId", authenticateToken, async (req, res) => {
   }
 });
 
-// Delete an admin notification
+// Delete a notification
 router.delete("/delete/:id", authenticateToken, async (req, res) => {
   try {
-    await adminNotificationService.deleteAdminNotification(req.params.id);
+    await notificationService.deleteNotification(req.params.id);
     res.status(200).json({ message: "Notification deleted" });
   } catch (error) {
     res.status(400).json({ message: "Delete failed", error: error.message });
