@@ -5,44 +5,41 @@ require("dotenv").config();
 
 const app = express();
 
-// Routes
-
-const adminRoute = require("./router/admin_Route.js");
-const userRoute = require("./router/user_Route.js");
-const loanRoute = require("./router/loan_Route.js");
-const paymentRoute = require("./router/payment_Route.js");
-const kycRoute = require("./router/kyc_Route.js");
-const notificationRoute = require("./router/notification_Route.js");
-
-const dbUrl =
-  "mongodb+srv://pockettloan:pockettloan12345@pocket.sbssyen.mongodb.net/?retryWrites=true&w=majority&appName=pocket";
-
-// const dbUrl = process.env.MONGODB_URI;
-//"mongodb://localhost:27017/Pocket_loan_Management"
-// "mongodb+srv://toto_academy:toto_academy@totoacademy.sprvhvq.mongodb.net/?retryWrites=true&w=majority&appName=totoAcademy/Pocket_loan_Management";
-
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose
-  .connect(dbUrl, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("Database connected successfully"))
-  .catch((err) => console.error("Error connecting to the database:", err));
+// Database connection
+const dbUrl = "mongodb+srv://pockettloan:pockettloan12345@pocket.sbssyen.mongodb.net/?retryWrites=true&w=majority&appName=pocket";
 
-// Register routes
-app.use("/api/v1/admin_route", adminRoute);
-app.use("/api/v1/user_route", userRoute);
-app.use("/api/v1/loan_route", loanRoute);
-app.use("/api/v1/payment_route", paymentRoute);
-app.use("/api/v1/kyc_route", kycRoute);
-app.use("/api/v1/notification_route", notificationRoute);
+mongoose.connect(dbUrl, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("Database connected successfully"))
+.catch((err) => console.error("Error connecting to the database:", err));
+
+// Import routes
+const adminRouter = require("./router/admin_Route");
+const userRouter = require("./router/user_Route");
+const loanRouter = require("./router/loan_Route");
+const paymentRouter = require("./router/payment_Route");
+const kycRouter = require("./router/kyc_Route");
+const notificationRouter = require("./router/notification_Route");
+
+// Use routes
+app.use("/api/v1/admin_route", adminRouter);
+app.use("/api/v1/user_route", userRouter);
+app.use("/api/v1/loan_route", loanRouter);
+app.use("/api/v1/payment_route", paymentRouter);
+app.use("/api/v1/kyc_route", kycRouter);
+app.use("/api/v1/notification_route", notificationRouter);
+
+// Create uploads directory if it doesn't exist
+const fs = require('fs-extra');
+fs.ensureDir('uploads/signatures').catch(err => console.error('Error creating uploads directory:', err));
 
 const port = 5050;
 app.listen(port, () => {
-  console.log(`The server is running at port: ${port}`);
+  console.log(`Server running on port ${port}`);
 });

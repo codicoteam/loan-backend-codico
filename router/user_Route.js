@@ -4,6 +4,42 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const userService = require("../services/user_Service");
 const { authenticateToken } = require("../middlewares/auth");
+const User = require('../models/user_model');
+const auth = require('../middlewares/auth');
+
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1) Check if email and password exist
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and password'
+      });
+    }
+
+    // 2) Check if user exists and password is correct
+    const user = await User.findOne({ email }).select('+password');
+    
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({
+        success: false,
+        message: 'Incorrect email or password'
+      });
+    }
+
+    // 3) If everything is OK, send token
+    auth.createSendToken(user, 200, res);
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
 
 // User Signup
 router.post("/signup", async (req, res) => {

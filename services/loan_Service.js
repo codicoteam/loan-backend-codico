@@ -1,4 +1,6 @@
 const Loan = require("../models/loan_model/loan_model");
+const pdfService = require("./pdfService");
+const User = require('../models/user_model');
 
 // Create a new loan application
 const createLoan = async (loanData) => {
@@ -6,6 +8,34 @@ const createLoan = async (loanData) => {
     const newLoan = new Loan(loanData);
     await newLoan.save();
     return newLoan;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const generateLoanAgreement = async (loanId, userId) => {
+  try {
+    const loan = await Loan.findById(loanId);
+    if (!loan) throw new Error("Loan not found");
+    
+    const user = await User.findById(userId);
+    if (!user) throw new Error("User not found");
+    
+    // Generate PDF
+    const pdfPath = await pdfService.generateLoanAgreement(loan, user);
+    
+    // Optionally sign it
+    const signatureDetails = {
+      signerName: `${user.firstName} ${user.lastName}`,
+      signatureId: `SIG-${Date.now()}`
+    };
+    const signedPdfPath = await pdfService.signPdf(pdfPath, signatureDetails);
+    
+    // Update loan with PDF reference
+    loan.agreementPdf = signedPdfPath;
+    await loan.save();
+    
+    return signedPdfPath;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -72,4 +102,5 @@ module.exports = {
   getLoansByUserId,
   updateLoan,
   deleteLoan,
+  generateLoanAgreement
 };

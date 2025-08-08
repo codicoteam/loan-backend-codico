@@ -17,11 +17,15 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
+    "fs-extra": "^11.3.1",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.17.0",
     "mongoose": "^8.15.1",
+    "multer": "^2.0.2",
     "nodemailer": "^6.10.1",
     "paynow": "^2.2.2",
+    "pdf-lib": "^1.17.1",
+    "pdfmake": "^0.2.20",
     "socket.io": "^4.8.1"
   }
 }
