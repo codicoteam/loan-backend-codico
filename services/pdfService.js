@@ -102,82 +102,45 @@ const pdfService = {
     }
   },
 
-  signLoanAgreement: async (pdfPath, signer, options = {}) => {
-    try {
-      const { name, title, signatureImagePath } = signer;
-      const { x = 50, y = 100, width = 200, height = 60 } = options;
+signLoanAgreement: async (pdfPath, signer, outputPath) => {
+  try {
+    const { signatureImagePath } = signer;
+    const pdfBytes = await fs.readFile(pdfPath);
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const page = pdfDoc.getPages()[0];
 
-      const pdfBytes = await fs.readFile(pdfPath);
-      const pdfDoc = await PDFDocument.load(pdfBytes);
-      const page = pdfDoc.getPages()[0];
+    // 1. Verify the image exists
+    if (signatureImagePath && await fs.pathExists(signatureImagePath)) {
+      const imageBytes = await fs.readFile(signatureImagePath);
+      let image;
 
-      // Draw signature box
-      page.drawRectangle({
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        borderWidth: 1,
-        borderColor: rgb(0.2, 0.2, 0.6),
-        borderOpacity: 0.7,
-      });
-
-      // Add signature text
-      page.drawText(`Signed by: ${name}`, {
-        x: x + 10,
-        y: y + 40,
-        size: 12,
-        color: rgb(0, 0, 0),
-      });
-
-      if (title) {
-        page.drawText(`Title: ${title}`, {
-          x: x + 10,
-          y: y + 25,
-          size: 10,
-          color: rgb(0.3, 0.3, 0.3),
-        });
+      // 2. Check image type
+      if (signatureImagePath.endsWith('.png')) {
+        image = await pdfDoc.embedPng(imageBytes);
+      } else if (signatureImagePath.endsWith('.jpg') || signatureImagePath.endsWith('.jpeg')) {
+        image = await pdfDoc.embedJpg(imageBytes);
       }
 
-      page.drawText(`Date: ${new Date().toLocaleDateString()}`, {
-        x: x + 10,
-        y: y + 10,
-        size: 10,
-        color: rgb(0.3, 0.3, 0.3),
-      });
+      // 3. Draw the image
+      page.drawImage(image, {
+  x: 120,       
+  y: 100,         // Move it slightly down if it’s taller
+  width: 300,    // Bigger width
+  height: 150    // Bigger height
+});
 
-      // Add signature image if provided
-      if (signatureImagePath && await fs.pathExists(signatureImagePath)) {
-        try {
-          const imageBytes = await fs.readFile(signatureImagePath);
-          let image;
-          
-          if (signatureImagePath.endsWith('.png')) {
-            image = await pdfDoc.embedPng(imageBytes);
-          } else if (signatureImagePath.endsWith('.jpg') || signatureImagePath.endsWith('.jpeg')) {
-            image = await pdfDoc.embedJpg(imageBytes);
-          }
-
-          if (image) {
-            page.drawImage(image, {
-              x: x + width - 90,
-              y: y + 10,
-              width: 80,
-              height: 40,
-            });
-          }
-        } catch (imageError) {
-          console.error('Signature image processing failed:', imageError);
-        }
-      }
-
-      const signedPath = pdfPath.replace('.pdf', '_signed.pdf');
-      await fs.writeFile(signedPath, await pdfDoc.save());
-      return signedPath;
-    } catch (error) {
-      throw new Error(`PDF signing failed: ${error.message}`);
+    } else {
+      console.log('Signature image not found at:', signatureImagePath);
     }
+
+    // 4. Save the PDF
+    await fs.writeFile(outputPath, await pdfDoc.save());
+    return outputPath;
+  } catch (error) {
+    console.error('PDF signing failed:', error);
+    throw error;
   }
-};
+}}
+  
 
 module.exports = pdfService;

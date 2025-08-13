@@ -141,7 +141,19 @@ const loanSchema = new mongoose.Schema(
       childrenUnder18: Number,
       dependents: Number,
     },
-
+    agreementPdf: {
+      type: String,
+      default: null
+    },
+    signedAt: {
+      type: Date,
+      default: null
+    },
+    signedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
     spouseInfo: {
       employed: Boolean,
       firstName: String,
@@ -199,6 +211,7 @@ const loanSchema = new mongoose.Schema(
     balance: Number,
     paymentSchedule: [paymentScheduleSchema],
   },
+  
   {
     timestamps: true,
   }

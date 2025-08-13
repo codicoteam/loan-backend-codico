@@ -1,6 +1,8 @@
 const Loan = require("../models/loan_model/loan_model");
 const pdfService = require("./pdfService");
 const User = require('../models/user_model');
+const fs = require('fs-extra');
+const path = require('path');
 
 // Create a new loan application
 const createLoan = async (loanData) => {
@@ -9,7 +11,8 @@ const createLoan = async (loanData) => {
     await newLoan.save();
     return newLoan;
   } catch (error) {
-    throw new Error(error.message);
+    console.error('Error creating loan:', error);
+    throw new Error(`Failed to create loan: ${error.message}`);
   }
 };
 
@@ -23,21 +26,10 @@ const generateLoanAgreement = async (loanId, userId) => {
     
     // Generate PDF
     const pdfPath = await pdfService.generateLoanAgreement(loan, user);
-    
-    // Optionally sign it
-    const signatureDetails = {
-      signerName: `${user.firstName} ${user.lastName}`,
-      signatureId: `SIG-${Date.now()}`
-    };
-    const signedPdfPath = await pdfService.signPdf(pdfPath, signatureDetails);
-    
-    // Update loan with PDF reference
-    loan.agreementPdf = signedPdfPath;
-    await loan.save();
-    
-    return signedPdfPath;
+    return pdfPath;
   } catch (error) {
-    throw new Error(error.message);
+    console.error('Error generating agreement:', error);
+    throw new Error(`PDF generation failed: ${error.message}`);
   }
 };
 
@@ -46,7 +38,8 @@ const getAllLoans = async () => {
   try {
     return await Loan.find().populate("user");
   } catch (error) {
-    throw new Error(error.message);
+    console.error('Error fetching loans:', error);
+    throw new Error(`Failed to fetch loans: ${error.message}`);
   }
 };
 
@@ -57,7 +50,8 @@ const getLoanById = async (id) => {
     if (!loan) throw new Error("Loan not found");
     return loan;
   } catch (error) {
-    throw new Error(error.message);
+    console.error('Error fetching loan:', error);
+    throw new Error(`Failed to fetch loan: ${error.message}`);
   }
 };
 
@@ -67,31 +61,80 @@ const getLoansByUserId = async (userId) => {
     const loans = await Loan.find({ user: userId }).populate("user");
     return loans;
   } catch (error) {
-    throw new Error(error.message);
+    console.error('Error fetching user loans:', error);
+    throw new Error(`Failed to fetch user loans: ${error.message}`);
   }
 };
 
-// Update a loan by ID
+// Update a loan by ID (CRITICAL FIX)
 const updateLoan = async (id, updateData) => {
   try {
-    const updatedLoan = await Loan.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
-    if (!updatedLoan) throw new Error("Loan not found");
+    const updatedLoan = await Loan.findByIdAndUpdate(
+      id, 
+      { $set: updateData },
+      { 
+        new: true,         // Return updated document
+        runValidators: true // Validate update data
+      }
+    );
+    
+    if (!updatedLoan) {
+      throw new Error("Loan not found or update failed");
+    }
+    
+    console.log('Successfully updated loan:', updatedLoan._id);
     return updatedLoan;
   } catch (error) {
-    throw new Error(error.message);
+    console.error('Error updating loan:', error);
+    throw new Error(`Failed to update loan: ${error.message}`);
   }
 };
-
+const updateLoanAgreement = async (loanId, pdfPath, userId) => {
+  try {
+    const updatedLoan = await Loan.findByIdAndUpdate(
+      loanId,
+      { 
+        agreementPdf: pdfPath,
+        signedAt: new Date(),
+        signedBy: userId
+      },
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedLoan) {
+      throw new Error("Failed to update loan with PDF reference");
+    }
+    
+    console.log('Successfully updated loan with PDF:', {
+      loanId,
+      pdfPath: updatedLoan.agreementPdf
+    });
+    
+    return updatedLoan;
+  } catch (error) {
+    console.error('Error updating loan agreement:', error);
+    throw new Error(`Failed to update loan agreement: ${error.message}`);
+  }
+};
 // Delete a loan by ID
 const deleteLoan = async (id) => {
   try {
+    const loan = await Loan.findById(id);
+    if (!loan) throw new Error("Loan not found");
+
+    // Clean up associated PDFs
+    if (loan.agreementPdf) {
+      const pdfPath = path.join(__dirname, '../', loan.agreementPdf);
+      if (await fs.pathExists(pdfPath)) {
+        await fs.remove(pdfPath);
+      }
+    }
+
     const deletedLoan = await Loan.findByIdAndDelete(id);
-    if (!deletedLoan) throw new Error("Loan not found");
     return deletedLoan;
   } catch (error) {
-    throw new Error(error.message);
+    console.error('Error deleting loan:', error);
+    throw new Error(`Failed to delete loan: ${error.message}`);
   }
 };
 
@@ -102,5 +145,6 @@ module.exports = {
   getLoansByUserId,
   updateLoan,
   deleteLoan,
+  updateLoanAgreement,
   generateLoanAgreement
 };

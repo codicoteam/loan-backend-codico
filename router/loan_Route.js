@@ -9,23 +9,25 @@ const path = require('path');
 
 // Configure multer storage
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/signatures/');
+  destination: function (req, file, cb) {
+    const dir = 'uploads/signatures/';
+    fs.mkdirsSync(dir); // Ensure directory exists
+    cb(null, dir);
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `${req.user._id}-${uniqueSuffix}${path.extname(file.originalname)}`);
+  filename: function (req, file, cb) {
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
   }
 });
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
+    if (['image/png', 'image/jpeg'].includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only PNG and JPG images are allowed'));
+      cb(new Error('Only PNG/JPEG images allowed'), false);
     }
   }
 });
@@ -163,66 +165,154 @@ router.get("/:id/agreement", authenticateToken, async (req, res) => {
 router.post('/upload-signature', authenticateToken, upload.single('signature'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No file uploaded' 
+      });
     }
 
-    await fs.ensureDir('uploads/signatures');
-
-    res.json({
+    console.log('Signature uploaded to:', req.file.path); // Add this line
+    res.json({ 
       success: true,
-      message: 'Signature uploaded successfully',
-      signaturePath: req.file.path
+      signaturePath: req.file.path 
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(500).json({ 
       success: false,
-      message: error.message
+      message: error.message 
     });
   }
 });
 
 // Sign existing PDF
-router.post('/:id/sign', authenticateToken, async (req, res) => {
+router.post('/upload-signature', authenticateToken, upload.single('signature'), async (req, res) => {
+  try {
+    if (!req.file) {
+      console.error('No file received in upload');
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    console.log('File saved to:', req.file.path);
+    console.log('File details:', {
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    });
+
+    res.json({
+      success: true,
+      path: req.file.path
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+// Serve the generated PDF
+router.get("/:id/document", authenticateToken, async (req, res) => {
+  try {
+    const loanId = req.params.id;
+    const pdfPath = path.join(__dirname, '../temp', `loan_${loanId}.pdf`);
+
+    if (!await fs.pathExists(pdfPath)) {
+      return res.status(404).json({ message: "PDF not found. Generate it first." });
+    }
+
+    // Stream the PDF file
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename=loan_${loanId}.pdf`);
+    fs.createReadStream(pdfPath).pipe(res);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+router.get("/:id/agreement", authenticateToken, async (req, res) => {
+  try {
+    const loan = await loanService.getLoanById(req.params.id);
+    
+    if (!loan.agreementPdf) {
+      return res.status(404).json({ 
+        success: false,
+        message: "No signed agreement found for this loan"
+      });
+    }
+
+    const fullPath = path.join(__dirname, '../', loan.agreementPdf);
+    
+    if (!await fs.pathExists(fullPath)) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Signed PDF file missing"
+      });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename=loan_agreement_${req.params.id}.pdf`);
+    fs.createReadStream(fullPath).pipe(res);
+
+  } catch (error) {
+    console.error('Agreement retrieval error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to retrieve agreement",
+      error: error.message
+    });
+  }
+});
+// In router/loan_Route.js
+// ... other routes ...
+
+// PUT THIS RIGHT BEFORE THE LAST LINE (module.exports)
+router.post('/:id/sign', authenticateToken, upload.single('signature'), async (req, res) => {
   try {
     const loan = await loanService.getLoanById(req.params.id);
     const user = req.user;
 
+    // Generate or find existing PDF
     const pdfPath = path.join(__dirname, '../temp', `loan_${loan._id}.pdf`);
     if (!await fs.pathExists(pdfPath)) {
       await pdfService.generateLoanAgreement(loan, user);
     }
 
-    const signedPath = await pdfService.signLoanAgreement(
-      pdfPath,
-      {
-        name: `${user.firstName} ${user.lastName}`,
-        title: req.body.title || 'Borrower',
-        signatureImagePath: req.body.signatureImagePath
-      },
-      {
-        x: req.body.x || 50,
-        y: req.body.y || 100
+    // Prepare signer data
+    const signer = {
+      name: `${user.firstName} ${user.lastName}`,
+      title: req.body.title || 'Borrower',
+      signatureImagePath: req.file ? req.file.path : null, // Use uploaded signature if available
+      options: {
+        x: 50,
+        y: 100,
+        width: 200,
+        height: 60
       }
-    );
+    };
 
-    const updatedLoan = await loanService.updateLoan(loan._id, { 
-      agreementPdf: signedPath,
+    // Sign the PDF
+    const signedPath = path.join(__dirname, '../temp', `loan_${loan._id}_signed.pdf`);
+    await pdfService.signLoanAgreement(pdfPath, signer, signedPath);
+
+    // Update database
+    const relativePath = `temp/loan_${loan._id}_signed.pdf`;
+    await loanService.updateLoan(loan._id, { 
+      agreementPdf: relativePath,
       signedAt: new Date(),
       signedBy: user._id
     });
 
-    res.json({
+    res.json({ 
       success: true,
       message: 'PDF signed successfully',
-      signedPdfUrl: `/loans/${loan._id}/agreement`,
-      loan: updatedLoan
+      pdfUrl: `/api/v1/loan_route/${loan._id}/agreement`
     });
+
   } catch (error) {
-    res.status(500).json({
+    console.error('Signing failed:', error);
+    res.status(500).json({ 
       success: false,
       message: error.message
     });
   }
 });
+
 
 module.exports = router;
