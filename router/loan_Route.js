@@ -212,8 +212,8 @@ router.post('/upload-signature', authenticateToken, upload.single('signature'), 
 router.get("/:id/document", authenticateToken, async (req, res) => {
   try {
     const loanId = req.params.id;
-    const pdfPath = path.join(__dirname, '../temp', `loan_${loanId}.pdf`);
-
+    const pdfPath = path.join(__dirname, '../documents', `loan_agreement_${loanId}.pdf`);
+console.log(pdfPath)
     if (!await fs.pathExists(pdfPath)) {
       return res.status(404).json({ message: "PDF not found. Generate it first." });
     }

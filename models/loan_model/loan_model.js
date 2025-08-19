@@ -115,14 +115,13 @@ const loanSchema = new mongoose.Schema(
     productType: {
       type: String,
       enum: [
-        "Education Loan (Short Term)", // Removed leading space
+        "Education Loan (Short Term)",
         "Vehicle Loan (Long Term)",
         "Solar Loan (LT)",
-        "Building Finisher Loan (LT)", // Removed leading space, kept space before (LT)
+        "Building Finisher Loan (LT)",
       ],
       required: true,
     },
-
     borrowerInfo: {
       firstName: String,
       middleNames: String,
@@ -141,14 +140,13 @@ const loanSchema = new mongoose.Schema(
       childrenUnder18: Number,
       dependents: Number,
     },
-    agreementPdf: {
-      type: String,
+    documentTracking: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'DocumentTracking',
       default: null
     },
-    signedAt: {
-      type: Date,
-      default: null
-    },
+    agreementPdf: String,
+    signedAt: Date,
     signedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -169,30 +167,24 @@ const loanSchema = new mongoose.Schema(
       oneMoney: Boolean,
       innsBucks: Boolean,
     },
-
     residentialHistory: {
       currentAddress: addressSchema,
       previousAddress: addressSchema,
       landlordName: String,
       rentalCompany: String,
     },
-
     borrowerEmploymentHistory: [employmentSchema],
     borrowerBusinessHistory: [businessSchema],
     spouseEmploymentHistory: [employmentSchema],
     spouseBusinessHistory: [businessSchema],
-
     financialSummary: financialSummarySchema,
     borrowerAssetsLiabilities: assetLiabilitySchema,
     spouseAssetsLiabilities: assetLiabilitySchema,
-
     bankReferences: [bankReferenceSchema],
-
     bankruptcy: {
       hasDeclared: Boolean,
       declaredDate: Date,
     },
-
     status: {
       type: String,
       enum: ["pending", "approved", "rejected", "active", "closed"],
@@ -211,7 +203,6 @@ const loanSchema = new mongoose.Schema(
     balance: Number,
     paymentSchedule: [paymentScheduleSchema],
   },
-  
   {
     timestamps: true,
   }
