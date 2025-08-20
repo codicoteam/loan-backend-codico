@@ -6,6 +6,7 @@ const pdfService = require('../services/pdfService');
 const fs = require('fs-extra');
 const multer = require('multer');
 const path = require('path');
+const User = require('../models/user_model'); // Add this import
 
 // Configure multer storage
 const storage = multer.diskStorage({
@@ -99,31 +100,47 @@ router.delete("/delete/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Generate loan agreement PDF
+// Generate loan agreement PDF - FIXED VERSION
 router.post('/:id/generate-agreement', authenticateToken, async (req, res) => {
   try {
     const loan = await loanService.getLoanById(req.params.id);
-    const user = req.user;
+    if (!loan) {
+      return res.status(404).json({ success: false, message: "Loan not found" });
+    }
+
+    // Get user data properly (not just from req.user which might be limited)
+    const user = await User.findById(loan.user || req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Use the same pdfService method that works in documentRoutes
     const pdfPath = await pdfService.generateLoanAgreement(loan, user);
-    
-    res.json({
-      success: true,
-      message: 'PDF generated successfully',
-      pdfUrl: `/loans/${loan._id}/document`
-    });
+
+    // Stream the PDF
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename=loan_${loan._id}.pdf`);
+    fs.createReadStream(pdfPath).pipe(res);
+
   } catch (error) {
-    res.status(500).json({ 
+    console.error("PDF generation failed:", error);
+    res.status(500).json({
       success: false,
-      message: error.message 
+      message: "Failed to generate PDF"
     });
   }
 });
 
-// Download loan agreement
+// Download loan agreement - FIXED VERSION
 router.get("/:id/download-agreement", authenticateToken, async (req, res) => {
   try {
     const loan = await loanService.getLoanById(req.params.id);
-    const user = req.user;
+    const user = await User.findById(loan.user || req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     const pdfPath = await pdfService.generateLoanAgreement(loan, user);
     
     res.download(pdfPath, `loan_agreement_${req.params.id}.pdf`, async (err) => {
@@ -171,7 +188,7 @@ router.post('/upload-signature', authenticateToken, upload.single('signature'), 
       });
     }
 
-    console.log('Signature uploaded to:', req.file.path); // Add this line
+    console.log('Signature uploaded to:', req.file.path);
     res.json({ 
       success: true,
       signaturePath: req.file.path 
@@ -184,38 +201,22 @@ router.post('/upload-signature', authenticateToken, upload.single('signature'), 
   }
 });
 
-// Sign existing PDF
-router.post('/upload-signature', authenticateToken, upload.single('signature'), async (req, res) => {
-  try {
-    if (!req.file) {
-      console.error('No file received in upload');
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
+// Remove duplicate upload route
+// router.post('/upload-signature', authenticateToken, upload.single('signature'), async (req, res) => {
+//   // This is a duplicate - remove it
+// });
 
-    console.log('File saved to:', req.file.path);
-    console.log('File details:', {
-      originalname: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size
-    });
-
-    res.json({
-      success: true,
-      path: req.file.path
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
 // Serve the generated PDF
 router.get("/:id/document", authenticateToken, async (req, res) => {
   try {
     const loanId = req.params.id;
-    const pdfPath = path.join(__dirname, '../documents', `loan_agreement_${loanId}.pdf`);
-console.log(pdfPath)
+    const pdfPath = path.join(__dirname, '../temp', `loan_${loanId}.pdf`);
+    
     if (!await fs.pathExists(pdfPath)) {
-      return res.status(404).json({ message: "PDF not found. Generate it first." });
+      // Generate it on the fly if it doesn't exist
+      const loan = await loanService.getLoanById(loanId);
+      const user = await User.findById(loan.user || req.user.id);
+      await pdfService.generateLoanAgreement(loan, user);
     }
 
     // Stream the PDF file
@@ -226,64 +227,30 @@ console.log(pdfPath)
     res.status(500).json({ message: error.message });
   }
 });
-router.get("/:id/agreement", authenticateToken, async (req, res) => {
-  try {
-    const loan = await loanService.getLoanById(req.params.id);
-    
-    if (!loan.agreementPdf) {
-      return res.status(404).json({ 
-        success: false,
-        message: "No signed agreement found for this loan"
-      });
-    }
 
-    const fullPath = path.join(__dirname, '../', loan.agreementPdf);
-    
-    if (!await fs.pathExists(fullPath)) {
-      return res.status(404).json({ 
-        success: false,
-        message: "Signed PDF file missing"
-      });
-    }
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename=loan_agreement_${req.params.id}.pdf`);
-    fs.createReadStream(fullPath).pipe(res);
-
-  } catch (error) {
-    console.error('Agreement retrieval error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: "Failed to retrieve agreement",
-      error: error.message
-    });
-  }
-});
-// In router/loan_Route.js
-// ... other routes ...
-
-// PUT THIS RIGHT BEFORE THE LAST LINE (module.exports)
+// Sign PDF route - FIXED VERSION
 router.post('/:id/sign', authenticateToken, upload.single('signature'), async (req, res) => {
   try {
     const loan = await loanService.getLoanById(req.params.id);
-    const user = req.user;
+    const user = await User.findById(loan.user || req.user.id);
 
-    // Generate or find existing PDF
-    const pdfPath = path.join(__dirname, '../temp', `loan_${loan._id}.pdf`);
-    if (!await fs.pathExists(pdfPath)) {
-      await pdfService.generateLoanAgreement(loan, user);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
     }
+
+    // Generate the PDF using the proper service method
+    const pdfPath = await pdfService.generateLoanAgreement(loan, user);
 
     // Prepare signer data
     const signer = {
       name: `${user.firstName} ${user.lastName}`,
       title: req.body.title || 'Borrower',
-      signatureImagePath: req.file ? req.file.path : null, // Use uploaded signature if available
+      signatureImagePath: req.file ? req.file.path : null,
       options: {
-        x: 50,
+        x: 120, // Match coordinates from documentRoutes
         y: 100,
-        width: 200,
-        height: 60
+        width: 300,
+        height: 150
       }
     };
 
@@ -313,6 +280,5 @@ router.post('/:id/sign', authenticateToken, upload.single('signature'), async (r
     });
   }
 });
-
 
 module.exports = router;
