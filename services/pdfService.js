@@ -13,7 +13,8 @@ const fonts = {
 };
 
 const printer = new PdfPrinter(fonts);
-const tempDir = path.join(__dirname, '../temp');
+// ✅ FIXED: Use consistent temp directory path for both local and Render
+const tempDir = path.join(process.cwd(), 'temp');
 const assetsDir = path.join(__dirname, 'assets');
 
 // 🎨 LOGO-MATCHING COLORS - Orange to Yellow Gradient Theme
@@ -31,20 +32,23 @@ const PDF_COLORS = {
 };
 
 async function ensureTempDir() {
-  await fs.ensureDir(tempDir);
+  try {
+    await fs.ensureDir(tempDir);
+    console.log(`✅ Temp directory ensured: ${tempDir}`);
+  } catch (error) {
+    console.error(`❌ Failed to create temp directory: ${tempDir}`, error);
+    throw error;
+  }
 }
 
 async function ensureAssetsDir() {
   await fs.ensureDir(assetsDir);
 }
 
-// ✅ Function to copy loan.jpg to services/assets and remove old logo files
+// ✅ Function to setup logo - REMOVED ABSOLUTE PATHS
 async function setupLogo() {
   try {
     await ensureAssetsDir();
-    
-    const sourceLoanPath = 'C:\\Users\\DELL\\Documents\\loan.jpg';
-    const targetLoanPath = path.join(assetsDir, 'loan.jpg');
     
     // Remove existing logo files
     const oldLogoFiles = [
@@ -63,15 +67,8 @@ async function setupLogo() {
       }
     }
     
-    // Copy loan.jpg to services/assets if it exists in Documents
-    if (await fs.pathExists(sourceLoanPath)) {
-      await fs.copy(sourceLoanPath, targetLoanPath);
-      console.log(`✅ Copied loan.jpg from Documents to: ${targetLoanPath}`);
-      return targetLoanPath;
-    } else {
-      console.log('ℹ  loan.jpg not found in Documents folder');
-      return null;
-    }
+    console.log('ℹ  Logo setup complete. Please manually place loan.jpg in services/assets/ folder');
+    return null;
     
   } catch (error) {
     console.error('Error setting up logo:', error.message);
@@ -100,18 +97,26 @@ async function getBase64Image(filePath) {
   return null;
 }
 
-// ✅ Get logo path - NOW ONLY looks for loan.jpg in services/assets
+// ✅ Get logo path - REMOVED ABSOLUTE WINDOWS PATHS
 async function getLogoPath() {
   const possibleLogoPaths = [
     // Primary location - services/assets/loan.jpg
     path.join(assetsDir, 'loan.jpg'),
+    path.join(process.cwd(), 'services', 'assets', 'loan.jpg'),
+    path.join(__dirname, '../services/assets/loan.jpg'),
     
-    // Fallback location - original Documents folder
-    'C:\\Users\\DELL\\Documents\\loan.jpg'
+    // Alternative locations
+    path.join(process.cwd(), 'assets', 'loan.jpg'),
+    path.join(process.cwd(), 'loan.jpg')
   ];
 
+  console.log('🔍 Searching for logo in:');
   for (const logoPath of possibleLogoPaths) {
-    if (await fs.pathExists(logoPath)) {
+    console.log(`   Checking: ${logoPath}`);
+    const exists = await fs.pathExists(logoPath);
+    console.log(`   Exists: ${exists}`);
+    
+    if (exists) {
       console.log(`✅ Logo found at: ${logoPath}`);
       return logoPath;
     }
@@ -122,30 +127,37 @@ async function getLogoPath() {
   return null;
 }
 
-// ✅ Get lender signature path
+// ✅ Get lender signature path - REMOVED ABSOLUTE WINDOWS PATHS
 async function getLenderSignaturePath() {
   const possibleLenderSignaturePaths = [
-    // Primary location - signature5.jpg in project assets
+    // Primary locations - services/assets/
     path.join(assetsDir, 'signature5.jpg'),
+    path.join(assetsDir, 'screenshot3.png'),
+    path.join(assetsDir, 'signature.jpg'),
+    path.join(assetsDir, 'lender-signature.jpg'),
+    path.join(assetsDir, 'lender-signature.png'),
     
-    // Original screenshot3.png locations (as fallbacks)
-    path.join(process.cwd(), 'screenshot3.png'),
-    path.join(__dirname, '../screenshot3.png'),
-    path.join(process.cwd(), 'assets', 'screenshot3.png'),
-    path.join(process.cwd(), 'assets', 'signatures', 'screenshot3.png'),
-    'C:/Users/DELL/loan-backend/screenshot3.png',
-    
-    // signature5.jpg in other possible locations
+    // Project root and assets folder
     path.join(process.cwd(), 'signature5.jpg'),
-    path.join(__dirname, '../signature5.jpg'),
+    path.join(process.cwd(), 'screenshot3.png'),
     path.join(process.cwd(), 'assets', 'signature5.jpg'),
+    path.join(process.cwd(), 'assets', 'screenshot3.png'),
+    path.join(process.cwd(), 'assets', 'signatures', 'signature5.jpg'),
     
-    // Original Screenshots folder as last resort
-    'C:/Users/DELL/Pictures/Screenshots/signature5.jpg'
+    // Relative paths from various locations
+    path.join(__dirname, '../signature5.jpg'),
+    path.join(__dirname, '../screenshot3.png'),
+    path.join(__dirname, '../assets', 'signature5.jpg'),
+    path.join(__dirname, '../assets', 'screenshot3.png')
   ];
 
+  console.log('🔍 Searching for lender signature in:');
   for (const lenderPath of possibleLenderSignaturePaths) {
-    if (await fs.pathExists(lenderPath)) {
+    console.log(`   Checking: ${lenderPath}`);
+    const exists = await fs.pathExists(lenderPath);
+    console.log(`   Exists: ${exists}`);
+    
+    if (exists) {
       console.log(`✅ Lender signature found: ${lenderPath}`);
       return lenderPath;
     }
@@ -165,7 +177,7 @@ async function checkLenderSignature() {
     console.log(`   Size: ${stats.size} bytes`);
     return true;
   } else {
-    console.log('❌ Lender signature not found. Please place screenshot3.png in project root');
+    console.log('❌ Lender signature not found. Please add signature file to services/assets/');
     return false;
   }
 }
@@ -173,6 +185,7 @@ async function checkLenderSignature() {
 // Setup logo and check signature when server starts
 async function initializePdfService() {
   console.log('🔄 Initializing PDF service...');
+  await ensureTempDir(); // ✅ Ensure temp directory exists first
   await setupLogo();
   await checkLenderSignature();
   console.log('✅ PDF service initialized');
@@ -361,7 +374,8 @@ const pdfService = {
                         margin: [0, 5, 0, 5]
                       }]
                     : [
-                        { text: '', alignment: 'center', style: 'signatureLine' }
+                        { text: '_________________________', alignment: 'center', style: 'signatureLine' },
+                        { text: '(Signature not found)', alignment: 'center', style: 'signatureTitle', italics: true }
                       ]),
                   
                   { text: 'Authorized Representative', alignment: 'center', style: 'signatureTitle' },
@@ -374,7 +388,7 @@ const pdfService = {
                 width: '45%',
                 stack: [
                   { text: 'BORROWER', style: 'signatureLabel' },
-                  { text: '', alignment: 'center', style: 'signatureLine' },
+                  { text: '_________________________', alignment: 'center', style: 'signatureLine' },
                   { text: `${user.firstName} ${user.lastName}`, alignment: 'center', style: 'borrowerName' },
                   { text: 'Date: __________________', alignment: 'center', style: 'dateField' }
                 ]
@@ -559,8 +573,28 @@ const pdfService = {
       console.log(`   Input PDF: ${pdfPath}`);
       console.log(`   Output PDF: ${outputPath}`);
 
+      // ✅ DEBUG: Check if files exist
+      console.log(`   Temp directory: ${tempDir}`);
+      const tempExists = await fs.pathExists(tempDir);
+      console.log(`   Temp directory exists: ${tempExists}`);
+      
+      if (!tempExists) {
+        await fs.ensureDir(tempDir);
+        console.log(`   Created temp directory: ${tempDir}`);
+      }
+
       // ✅ Check if the source PDF exists
       if (!await fs.pathExists(pdfPath)) {
+        console.error(`❌ Source PDF not found: ${pdfPath}`);
+        
+        // List files in temp directory for debugging
+        try {
+          const files = await fs.readdir(tempDir);
+          console.log(`   Available files in temp: ${files.join(', ')}`);
+        } catch (err) {
+          console.error(`   Cannot read temp directory: ${err.message}`);
+        }
+        
         throw new Error(`Source PDF not found: ${pdfPath}`);
       }
 
@@ -637,7 +671,10 @@ const pdfService = {
   setupLogo: setupLogo,
   
   // 🎨 New method to get colors for external use
-  getColors: () => PDF_COLORS
+  getColors: () => PDF_COLORS,
+  
+  // ✅ Add method to get temp directory path
+  getTempDir: () => tempDir
 };
 
 module.exports = pdfService;
