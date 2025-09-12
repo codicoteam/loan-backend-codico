@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Loan Agreement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #FF6B35;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-area {
+            border: 2px dashed #FF8C42;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            background-color: #FFF8F0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            background-color: rgba(255, 107, 53, 0.1);
+        }
+        .preview {
+            max-width: 300px;
+            max-height: 150px;
+            margin: 20px auto;
+            display: block;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            background: white;
+        }
+        button {
+            background-color: #FF6B35;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            cursor: pointer;
+            margin: 10px 5px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #FF8C42;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 107, 53, 0.3);
+            border-radius: 50%;
+            border-top-color: #FF6B35;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: #FFD700;
+            color: #2D1810;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .download-link:hover {
+            background-color: #e6c300;
+            transform: translateY(-2px);
+        }
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sign Your Loan Agreement</h1>
+        
+        <div class="section">
+            <h2>Upload Your Signature</h2>
+            <div class="upload-area" id="uploadArea">
+                <p>📁 Click to upload signature image</p>
+                <p><small>Supported formats: JPG, PNG (Max 2MB)</small></p>
+                <input type="file" id="signatureUpload" accept=".jpg,.jpeg,.png" style="display: none;">
+            </div>
+            
+            <img id="previewImage" class="preview" alt="Signature preview" style="display: none;">
+            
+            <div style="text-align: center;">
+                <button id="uploadBtn" disabled>Upload Signature</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Sign Document</h2>
+            <div style="text-align: center;">
+                <button id="signBtn" disabled>Sign Document</button>
+            </div>
+        </div>
+        
+        <div id="statusMessage" class="status" style="display: none;"></div>
+        
+        <div style="text-align: center;">
+            <a id="downloadLink" class="download-link" style="display: none;">Download Signed Agreement</a>
+        </div>
+    </div>
+
+    <script>
+        // Get loanId from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const loanId = urlParams.get('loanId');
+        
+        if (!loanId) {
+            document.body.innerHTML = `
+                <div class="container">
+                    <h1>Error: Loan ID is Required</h1>
+                    <p>Please provide a loan ID in the URL: <code>?loanId=YOUR_LOAN_ID</code></p>
+                    <p>Example: <code>https://yourserver.com/sign-agreement?loanId=12345</code></p>
+                </div>
+            `;
+        } else {
+            // Display loan ID on page
+            document.querySelector('h1').textContent += ` - Loan #${loanId}`;
+        }
+        
+        document.getElementById('uploadArea').addEventListener('click', () => {
+            document.getElementById('signatureUpload').click();
+        });
+        
+        document.getElementById('signatureUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type and size
+                if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                    showStatus('Please upload a JPG or PNG image.', 'error');
+                    return;
+                }
+                
+                if (file.size > 2 * 1024 * 1024) {
+                    showStatus('Image must be less than 2MB.', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('previewImage');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    document.getElementById('uploadBtn').disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        document.getElementById('uploadBtn').addEventListener('click', async function() {
+            const fileInput = document.getElementById('signatureUpload');
+            if (!fileInput.files.length) return;
+            
+            const formData = new FormData();
+            formData.append('signature', fileInput.files[0]);
+            // Add loanId to form data
+            formData.append('loanId', loanId);
+            
+            showStatus('Uploading signature...', 'loading');
+            
+            try {
+                // Include loanId in the URL as a query parameter
+                const response = await fetch(`/api/upload-signature?loanId=${loanId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showStatus('Signature uploaded successfully!', 'success');
+                    document.getElementById('signBtn').disabled = false;
+                } else {
+                    showStatus('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Error uploading signature: ' + error.message, 'error');
+            }
+        });
+        
+        document.getElementById('signBtn').addEventListener('click', async function() {
+            showStatus('Signing document...', 'loading');
+            
+            try {
+                // Include loanId in the URL as a query parameter
+                const response = await fetch(`/api/sign-agreement?loanId=${loanId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ loanId }) // Also include in body for good measure
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showStatus('Document signed successfully!', 'success');
+                    document.getElementById('downloadLink').href = result.signedPdfUrl;
+                    document.getElementById('downloadLink').style.display = 'inline-block';
+                } else {
+                    showStatus('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Error signing document: ' + error.message, 'error');
+            }
+        });
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.innerHTML = type === 'loading' 
+                ? `<span class="loading"></span> ${message}`
+                : message;
+                
+            statusEl.className = 'status';
+            statusEl.style.display = 'block';
+            
+            if (type === 'success') {
+                statusEl.classList.add('success');
+            } else if (type === 'error') {
+                statusEl.classList.add('error');
+            }
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

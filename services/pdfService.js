@@ -13,9 +13,9 @@ const fonts = {
 };
 
 const printer = new PdfPrinter(fonts);
-// ✅ FIXED: Use consistent temp directory path for both local and Render
 const tempDir = path.join(process.cwd(), 'temp');
 const assetsDir = path.join(__dirname, 'assets');
+const signaturesDir = path.join(tempDir, 'signatures');
 
 // 🎨 LOGO-MATCHING COLORS - Orange to Yellow Gradient Theme
 const PDF_COLORS = {
@@ -35,9 +35,27 @@ async function ensureTempDir() {
   try {
     await fs.ensureDir(tempDir);
     console.log(`✅ Temp directory ensured: ${tempDir}`);
+    
+    // Also ensure signatures directory
+    await fs.ensureDir(signaturesDir);
+    console.log(`✅ Signatures directory ensured: ${signaturesDir}`);
+    
+    return true;
   } catch (error) {
     console.error(`❌ Failed to create temp directory: ${tempDir}`, error);
-    throw error;
+    
+    // Try fallback location for Render compatibility
+    const fallbackTempDir = path.join(__dirname, 'temp');
+    console.log(`🔄 Trying fallback temp directory: ${fallbackTempDir}`);
+    
+    try {
+      await fs.ensureDir(fallbackTempDir);
+      console.log(`✅ Fallback temp directory created: ${fallbackTempDir}`);
+      return true;
+    } catch (fallbackError) {
+      console.error(`❌ Failed to create fallback temp directory: ${fallbackError.message}`);
+      throw error;
+    }
   }
 }
 
@@ -45,7 +63,7 @@ async function ensureAssetsDir() {
   await fs.ensureDir(assetsDir);
 }
 
-// ✅ Function to setup logo - REMOVED ABSOLUTE PATHS
+// ✅ Function to setup logo
 async function setupLogo() {
   try {
     await ensureAssetsDir();
@@ -79,25 +97,35 @@ async function setupLogo() {
 // ✅ Improved getBase64Image function
 async function getBase64Image(filePath) {
   try {
+    console.log(`🔄 Attempting to read image: ${filePath}`);
+    
     if (await fs.pathExists(filePath)) {
+      console.log(`✅ File exists: ${filePath}`);
       const imageBytes = await fs.readFile(filePath);
+      console.log(`✅ File read successfully, size: ${imageBytes.length} bytes`);
+      
       const ext = path.extname(filePath).slice(1).toLowerCase();
+      console.log(`📁 File extension: ${ext}`);
       
       const validFormats = ['jpg', 'jpeg', 'png'];
       if (!validFormats.includes(ext)) {
-        console.warn(`Unsupported image format: ${ext}`);
+        console.warn(`❌ Unsupported image format: ${ext}`);
         return null;
       }
       
-      return `data:image/${ext === 'jpg' ? 'jpeg' : ext};base64,${imageBytes.toString('base64')}`;
+      const base64String = `data:image/${ext === 'jpg' ? 'jpeg' : ext};base64,${imageBytes.toString('base64')}`;
+      console.log(`✅ Base64 conversion successful, length: ${base64String.length} chars`);
+      return base64String;
+    } else {
+      console.log(`❌ File does not exist: ${filePath}`);
     }
   } catch (error) {
-    console.error('Error reading image file:', error.message);
+    console.error('❌ Error reading image file:', error.message);
   }
   return null;
 }
 
-// ✅ Get logo path - REMOVED ABSOLUTE WINDOWS PATHS
+// ✅ Get logo path
 async function getLogoPath() {
   const possibleLogoPaths = [
     // Primary location - services/assets/loan.jpg
@@ -127,43 +155,26 @@ async function getLogoPath() {
   return null;
 }
 
-// ✅ Get lender signature path - REMOVED ABSOLUTE WINDOWS PATHS
+// ✅ Get lender signature path
 async function getLenderSignaturePath() {
   const possibleLenderSignaturePaths = [
-    // Primary locations - services/assets/
-    path.join(assetsDir, 'signature5.jpg'),
+    // Primary location - services/assets/screenshot3.png
     path.join(assetsDir, 'screenshot3.png'),
-    path.join(assetsDir, 'signature.jpg'),
-    path.join(assetsDir, 'lender-signature.jpg'),
-    path.join(assetsDir, 'lender-signature.png'),
     
-    // Project root and assets folder
-    path.join(process.cwd(), 'signature5.jpg'),
+    // Fallback locations
     path.join(process.cwd(), 'screenshot3.png'),
-    path.join(process.cwd(), 'assets', 'signature5.jpg'),
     path.join(process.cwd(), 'assets', 'screenshot3.png'),
-    path.join(process.cwd(), 'assets', 'signatures', 'signature5.jpg'),
-    
-    // Relative paths from various locations
-    path.join(__dirname, '../signature5.jpg'),
-    path.join(__dirname, '../screenshot3.png'),
-    path.join(__dirname, '../assets', 'signature5.jpg'),
-    path.join(__dirname, '../assets', 'screenshot3.png')
   ];
 
-  console.log('🔍 Searching for lender signature in:');
+  console.log('🔍 Searching for lender signature...');
   for (const lenderPath of possibleLenderSignaturePaths) {
-    console.log(`   Checking: ${lenderPath}`);
-    const exists = await fs.pathExists(lenderPath);
-    console.log(`   Exists: ${exists}`);
-    
-    if (exists) {
+    if (await fs.pathExists(lenderPath)) {
       console.log(`✅ Lender signature found: ${lenderPath}`);
       return lenderPath;
     }
   }
   
-  console.log('ℹ  Lender signature not found. Please place signature5.jpg in services/assets/ folder');
+  console.log('❌ Lender signature not found. Please place screenshot3.png in services/assets/ folder');
   return null;
 }
 
@@ -193,6 +204,40 @@ async function initializePdfService() {
 
 // Initialize when this module is loaded
 initializePdfService();
+
+// ✅ Function to save uploaded signature
+async function saveUploadedSignature(signatureFile, loanId) {
+  try {
+    await ensureTempDir();
+    
+    const signatureExt = path.extname(signatureFile.originalname);
+    const signatureFilename = `borrower_signature_${loanId}${signatureExt}`;
+    const signaturePath = path.join(signaturesDir, signatureFilename);
+    
+    // Move the uploaded file to signatures directory
+    await fs.move(signatureFile.path, signaturePath, { overwrite: true });
+    
+    console.log(`✅ Borrower signature saved: ${signaturePath}`);
+    return signaturePath;
+  } catch (error) {
+    console.error('❌ Error saving signature:', error);
+    throw new Error(`Failed to save signature: ${error.message}`);
+  }
+}
+
+// ✅ Function to get borrower signature path
+async function getBorrowerSignaturePath(loanId) {
+  const possibleExtensions = ['.png', '.jpg', '.jpeg'];
+  
+  for (const ext of possibleExtensions) {
+    const signaturePath = path.join(signaturesDir, `borrower_signature_${loanId}${ext}`);
+    if (await fs.pathExists(signaturePath)) {
+      return signaturePath;
+    }
+  }
+  
+  return null;
+}
 
 const pdfService = {
   generateLoanAgreement: async (loan, user) => {
@@ -583,7 +628,7 @@ const pdfService = {
         console.log(`   Created temp directory: ${tempDir}`);
       }
 
-      // ✅ Check if the source PDF exists
+      // ✅ Check if the source PDF exists with better debugging
       if (!await fs.pathExists(pdfPath)) {
         console.error(`❌ Source PDF not found: ${pdfPath}`);
         
@@ -595,22 +640,22 @@ const pdfService = {
           console.error(`   Cannot read temp directory: ${err.message}`);
         }
         
-        throw new Error(`Source PDF not found: ${pdfPath}`);
+        throw new Error(`Source PDF not found: ${pdfPath}. Please check if the PDF was generated successfully.`);
       }
 
-      const { signatureImagePath } = signer; // Only need borrower signature now
+      console.log(`✅ Source PDF found: ${pdfPath}`);
       const pdfBytes = await fs.readFile(pdfPath);
       const pdfDoc = await PDFDocument.load(pdfBytes);
       const pages = pdfDoc.getPages();
       const page = pages[pages.length - 1];
 
       // ✅ Add BORROWER signature ONLY (if provided) - RIGHT SIDE
-      if (signatureImagePath && await fs.pathExists(signatureImagePath)) {
-        console.log(`✅ Adding borrower signature: ${signatureImagePath}`);
-        const imageBytes = await fs.readFile(signatureImagePath);
+      if (signer.signatureImagePath && await fs.pathExists(signer.signatureImagePath)) {
+        console.log(`✅ Adding borrower signature: ${signer.signatureImagePath}`);
+        const imageBytes = await fs.readFile(signer.signatureImagePath);
         let image;
 
-        const ext = path.extname(signatureImagePath).toLowerCase();
+        const ext = path.extname(signer.signatureImagePath).toLowerCase();
         if (ext === '.png') {
           image = await pdfDoc.embedPng(imageBytes);
         } else if (['.jpg', '.jpeg'].includes(ext)) {
@@ -642,24 +687,46 @@ const pdfService = {
         console.log('ℹ  No borrower signature provided - PDF will have blank borrower signature line');
       }
 
-      // ❌ REMOVED the lender signature addition here
-      // The lender signature is already in the template from generateLoanAgreement
-
       // ✅ Ensure output directory exists
-      await fs.ensureDir(path.dirname(outputPath));
+      const outputDir = path.dirname(outputPath);
+      await fs.ensureDir(outputDir);
+      console.log(`✅ Output directory ensured: ${outputDir}`);
       
       // ✅ Save the signed PDF
       const signedPdfBytes = await pdfDoc.save();
       await fs.writeFile(outputPath, signedPdfBytes);
       
-      console.log(`✅ Loan agreement successfully signed: ${outputPath}`);
-      return outputPath;
+      // ✅ Verify the file was created
+      const outputExists = await fs.pathExists(outputPath);
+      if (outputExists) {
+        const stats = await fs.stat(outputPath);
+        console.log(`✅ Loan agreement successfully signed: ${outputPath}`);
+        console.log(`   File size: ${stats.size} bytes`);
+        
+        // ✅ LIST ALL FILES IN TEMP DIRECTORY FOR DEBUGGING
+        try {
+          const allFiles = await fs.readdir(tempDir);
+          console.log(`📁 All files in temp directory now: ${allFiles.join(', ')}`);
+        } catch (err) {
+          console.error('Error listing temp files:', err.message);
+        }
+        
+        return outputPath;
+      } else {
+        throw new Error(`Signed PDF was not created at: ${outputPath}`);
+      }
 
     } catch (error) {
       console.error('❌ PDF signing failed:', error);
       throw new Error(`PDF signing failed: ${error.message}`);
     }
   },
+
+  // ✅ Save uploaded signature
+  saveUploadedSignature: saveUploadedSignature,
+
+  // ✅ Get borrower signature path
+  getBorrowerSignaturePath: getBorrowerSignaturePath,
 
   // ✅ Add method to check lender signature
   checkLenderSignature: checkLenderSignature,
@@ -674,7 +741,25 @@ const pdfService = {
   getColors: () => PDF_COLORS,
   
   // ✅ Add method to get temp directory path
-  getTempDir: () => tempDir
+  getTempDir: () => tempDir,
+  
+  // ✅ Add method to get signatures directory path
+  getSignaturesDir: () => signaturesDir,
+  
+  listTempFiles: async () => {
+    try {
+      await ensureTempDir();
+      const files = await fs.readdir(tempDir);
+      console.log(`📁 Files in temp directory (${tempDir}):`);
+      files.forEach(file => {
+        console.log(`   - ${file}`);
+      });
+      return files;
+    } catch (error) {
+      console.error('❌ Error listing temp files:', error.message);
+      return [];
+    }
+  }  
 };
 
 module.exports = pdfService;

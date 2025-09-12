@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Loan Agreement</title>
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --secondary: #FF8C42;
+            --accent: #FFF8F0;
+            --text: #2D1810;
+            --highlight: #FFD700;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h2 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .upload-area {
+            width: 100%;
+            max-width: 500px;
+            height: 200px;
+            border: 2px dashed var(--primary);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: var(--accent);
+        }
+        
+        .upload-area:hover {
+            background-color: rgba(255, 107, 53, 0.1);
+        }
+        
+        .upload-area i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            text-align: center;
+            color: var(--text);
+        }
+        
+        .upload-text p {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .signature-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .signature-preview img {
+            max-width: 300px;
+            max-height: 150px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            background: white;
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .signature-canvas {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            margin-bottom: 15px;
+        }
+        
+        .canvas-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .canvas-btn {
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .canvas-btn:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 107, 53, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .download-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: var(--highlight);
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .download-link:hover {
+            background-color: #e6c300;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sign Your Loan Agreement</h1>
+        
+        <div class="section">
+            <h2>Upload Your Signature</h2>
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <i>📁</i>
+                    <div class="upload-text">
+                        <h3>Click to upload signature image</h3>
+                        <p>Supported formats: JPG, PNG (Max 2MB)</p>
+                    </div>
+                </div>
+                <input type="file" id="signatureUpload" accept=".jpg,.jpeg,.png" style="display: none;">
+                
+                <div class="signature-preview" id="signaturePreview" style="display: none;">
+                    <h3>Your Signature Preview</h3>
+                    <img id="previewImage" src="" alt="Signature preview">
+                </div>
+                
+                <button class="btn" id="uploadSignatureBtn" style="display: none;">Upload Signature</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Or Draw Your Signature</h2>
+            <div style="display: flex; justify-content: center;">
+                <canvas id="signatureCanvas" class="signature-canvas" width="400" height="200"></canvas>
+            </div>
+            <div class="canvas-controls">
+                <button class="canvas-btn" id="clearCanvas">Clear</button>
+                <button class="canvas-btn" id="saveCanvas">Save Signature</button>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn" id="signDocument" disabled>Sign Document</button>
+            
+            <div id="statusMessage" class="status" style="display: none;"></div>
+            
+            <a id="downloadLink" class="download-link" style="display: none;" href="#" target="_blank">Download Signed Agreement</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('signatureUpload');
+            const signaturePreview = document.getElementById('signaturePreview');
+            const previewImage = document.getElementById('previewImage');
+            const uploadSignatureBtn = document.getElementById('uploadSignatureBtn');
+            const signDocumentBtn = document.getElementById('signDocument');
+            const statusMessage = document.getElementById('statusMessage');
+            const downloadLink = document.getElementById('downloadLink');
+            const canvas = document.getElementById('signatureCanvas');
+            const clearCanvasBtn = document.getElementById('clearCanvas');
+            const saveCanvasBtn = document.getElementById('saveCanvas');
+            
+            // Canvas setup
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            
+            // State
+            let signatureUploaded = false;
+            const loanId = new URLSearchParams(window.location.search).get('loanId');
+            
+            // Event listeners
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleSignatureUpload);
+            uploadSignatureBtn.addEventListener('click', uploadSignature);
+            signDocumentBtn.addEventListener('click', signDocument);
+            
+            // Canvas events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', handleTouchStart);
+            canvas.addEventListener('touchmove', handleTouchMove);
+            canvas.addEventListener('touchend', stopDrawing);
+            
+            clearCanvasBtn.addEventListener('click', clearCanvas);
+            saveCanvasBtn.addEventListener('click', saveCanvasSignature);
+            
+            // Functions
+            function handleSignatureUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                // Check file type and size
+                if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                    showStatus('Please upload a JPG or PNG image.', 'error');
+                    return;
+                }
+                
+                if (file.size > 2 * 1024 * 1024) {
+                    showStatus('Image must be less than 2MB.', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    signaturePreview.style.display = 'block';
+                    uploadSignatureBtn.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function handleTouchStart(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }
+            
+            function handleTouchMove(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            function clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            function saveCanvasSignature() {
+                const dataUrl = canvas.toDataURL('image/png');
+                previewImage.src = dataUrl;
+                signaturePreview.style.display = 'block';
+                uploadSignatureBtn.style.display = 'block';
+            }
+            
+            async function uploadSignature() {
+                if (!previewImage.src) {
+                    showStatus('Please provide a signature first.', 'error');
+                    return;
+                }
+                
+                showStatus('Uploading signature...', 'loading');
+                
+                try {
+                    // Convert data URL to blob for upload
+                    const blob = await fetch(previewImage.src).then(res => res.blob());
+                    
+                    // Create form data
+                    const formData = new FormData();
+                    formData.append('signature', blob, 'signature.png');
+                    formData.append('loanId', loanId);
+                    
+                    // Send to server
+                    const response = await fetch('/api/upload-signature', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        showStatus('Signature uploaded successfully!', 'success');
+                        signatureUploaded = true;
+                        updateSignButtonState();
+                    } else {
+                        showStatus(result.error || 'Error uploading signature', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showStatus('Error uploading signature. Please try again.', 'error');
+                }
+            }
+            
+            function updateSignButtonState() {
+                signDocumentBtn.disabled = !signatureUploaded;
+            }
+            
+            async function signDocument() {
+                if (!signatureUploaded) {
+                    showStatus('Please upload a signature first.', 'error');
+                    return;
+                }
+                
+                showStatus('Signing document...', 'loading');
+                
+                try {
+                    // Send request to sign the document
+                    const response = await fetch('/api/sign-agreement', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ loanId })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        showStatus('Document signed successfully!', 'success');
+                        downloadLink.href = result.signedPdfUrl;
+                        downloadLink.style.display = 'inline-block';
+                    } else {
+                        showStatus(result.error || 'Error signing document', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showStatus('Error signing document. Please try again.', 'error');
+                }
+            }
+            
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status';
+                
+                if (type === 'loading') {
+                    statusMessage.innerHTML = `<span class="loading"></span> ${message}`;
+                } else if (type === 'success' || type === 'error') {
+                    statusMessage.classList.add(type);
+                }
+                
+                statusMessage.style.display = 'block';
+                
+                // Auto-hide success messages after 5 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        statusMessage.style.display = 'none';
+                    }, 5000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

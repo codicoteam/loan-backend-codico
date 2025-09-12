@@ -9,17 +9,27 @@ const auth = {
         token = req.headers.authorization.split(' ')[1];
       }
 
+      console.log(`🔐 Auth middleware - Token received: ${token ? 'YES' : 'NO'}`);
+      
       if (!token) {
+        console.log('❌ No token provided');
         return res.status(401).json({
           success: false,
           message: 'Authorization token is required'
         });
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'Pocket_2025');
+      // Debug: Log the JWT secret being used
+      const jwtSecret = process.env.JWT_SECRET || 'Pocket_2025';
+      console.log(`🔐 JWT Secret being used: ${jwtSecret}`);
+      
+      const decoded = jwt.verify(token, jwtSecret);
+      console.log(`✅ Token decoded successfully for user: ${decoded.id}`);
+      
       const currentUser = await User.findById(decoded.id).select('+passwordChangedAt');
       
       if (!currentUser) {
+        console.log('❌ User account not found');
         return res.status(401).json({
           success: false,
           message: 'User account not found'
@@ -27,6 +37,7 @@ const auth = {
       }
 
       if (currentUser.changedPasswordAfter && currentUser.changedPasswordAfter(decoded.iat)) {
+        console.log('❌ Password was changed recently');
         return res.status(401).json({
           success: false,
           message: 'Password was changed recently. Please log in again.'
@@ -34,8 +45,11 @@ const auth = {
       }
 
       req.user = currentUser;
+      console.log(`✅ Authentication successful for user: ${currentUser.email}`);
       next();
     } catch (error) {
+      console.error('❌ Authentication error:', error.message);
+      
       if (error.name === 'JsonWebTokenError') {
         return res.status(401).json({
           success: false,
@@ -49,7 +63,7 @@ const auth = {
         });
       }
 
-      console.error('Authentication error:', error);
+      console.error('Authentication error details:', error);
       return res.status(500).json({
         success: false,
         message: 'Internal server error during authentication'
@@ -70,9 +84,11 @@ const auth = {
   },
 
   signToken: (userId, userRole, expiresIn = '30d') => {
+    const jwtSecret = process.env.JWT_SECRET || 'Pocket_2025';
+    console.log(`🔐 Signing token with secret: ${jwtSecret}`);
     return jwt.sign(
       { id: userId, role: userRole },
-      process.env.JWT_SECRET || 'Pocket_2025',
+      jwtSecret,
       { expiresIn }
     );
   },
